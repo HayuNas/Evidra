@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coming Soon</title>
+    <meta
+      name="description"
+      content="This project homepage is currently a placeholder. More details are coming soon."
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background: #0f172a;
+        color: #f8fafc;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+        background:
+          radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 32rem),
+          radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.2), transparent 28rem),
+          #0f172a;
+      }
+
+      main {
+        width: min(100%, 42rem);
+        padding: clamp(2rem, 6vw, 4rem);
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 1.5rem;
+        background: rgba(15, 23, 42, 0.72);
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.42);
+        text-align: center;
+        backdrop-filter: blur(18px);
+      }
+
+      .eyebrow {
+        margin: 0 0 1rem;
+        color: #38bdf8;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.75rem, 12vw, 6rem);
+        line-height: 0.95;
+      }
+
+      p {
+        margin: 1.5rem auto 0;
+        max-width: 32rem;
+        color: #cbd5e1;
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        line-height: 1.7;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 2rem;
+        padding: 0.75rem 1rem;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.12);
+        color: #e0f2fe;
+        font-weight: 600;
+      }
+
+      .dot {
+        width: 0.7rem;
+        height: 0.7rem;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+        animation: pulse 1.8s infinite;
+      }
+
+      @keyframes pulse {
+        70% {
+          box-shadow: 0 0 0 0.7rem rgba(34, 197, 94, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="page-title">
+      <p class="eyebrow">Project placeholder</p>
+      <h1 id="page-title">Coming Soon</h1>
+      <p>
+        这个项目主页正在准备中。现在先放一个简洁的占位页，后续会补充项目介绍、功能和更多内容。
+      </p>
+      <div class="status" aria-label="Project status">
+        <span class="dot" aria-hidden="true"></span>
+        Stay tuned
+      </div>
+    </main>
+  </body>
+</html>
