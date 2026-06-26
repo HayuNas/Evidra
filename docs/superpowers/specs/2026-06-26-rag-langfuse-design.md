@@ -40,6 +40,8 @@ rag-eval-assistant/
 
 前端使用一个简单的 Web UI，包含文档管理、问答页、引用查看和评测结果页。页面只服务作品展示，不做复杂后台管理。
 
+前端进入实现前必须使用 `frontend-design` skill。设计方向要围绕“可追溯的企业知识库问答”和“RAG 质量评测”建立视觉语言，而不是套用通用 SaaS 模板。前端计划阶段需要先给出颜色、字体、布局和一个可解释的 signature element，再进入代码实现。
+
 Langfuse Cloud 通过 Python SDK 或 Haystack 集成接入。每次问答创建 trace，检索、prompt 构建和 LLM 调用作为 observation/span 记录。
 
 ## 数据流
