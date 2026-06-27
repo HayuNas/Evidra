@@ -1,0 +1,18 @@
+[project]
+name = "evidra-backend"
+version = "0.1.0"
+description = "Interview demo backend for Evidra, a RAG evaluation and tuning workbench."
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.110",
+  "httpx2",
+  "python-multipart>=0.0.9",
+  "uvicorn>=0.27",
+]
+
+[project.optional-dependencies]
+pdf = ["pypdf>=4.0"]
+langfuse = ["langfuse>=4.0"]
+
+[tool.unittest]
+start-directory = "tests"
