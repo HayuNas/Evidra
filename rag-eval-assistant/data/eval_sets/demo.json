@@ -1,0 +1,13 @@
+[
+  {
+    "question": "What does an expense report need?",
+    "expected_terms": ["receipt"],
+    "required_source": "sample-handbook.md"
+  },
+  {
+    "question": "How often should access keys rotate?",
+    "expected_terms": ["quarterly"],
+    "required_source": "sample-handbook.md"
+  }
+]
+

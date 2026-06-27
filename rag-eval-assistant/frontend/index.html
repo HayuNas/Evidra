@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evidra</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M6 5h14v22H6zM10 10h6M10 15h6M22 18l5 5M21 24a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" />
+        </svg>
+        <h1 data-i18n="appTitle">Evidra</h1>
+      </div>
+      <nav class="top-nav" aria-label="主导航">
+        <button type="button" class="nav-button active" data-view-target="workbench">工作台</button>
+        <button type="button" class="nav-button" data-view-target="evaluation">评测</button>
+        <button type="button" class="nav-button" data-view-target="settings">参数设置</button>
+        <button type="button" class="nav-button" data-view-target="logs">日志</button>
+      </nav>
+      <label class="endpoint">
+        <span>Backend URL</span>
+        <input id="backendUrl" value="http://127.0.0.1:8010" />
+      </label>
+      <label class="language-switcher">
+        <span data-i18n="languageLabel">语言</span>
+        <select id="languageSelect">
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+      <div id="status" class="status" data-status-key="idle">空闲</div>
+    </header>
+
+    <main class="app-shell">
+      <section class="view-panel active" data-view="workbench">
+        <section class="workflow-strip">
+          <div class="flow-step active" data-flow-step="upload"><span>01</span><strong data-i18n="flowUpload">Upload</strong></div>
+          <div class="flow-step" data-flow-step="retrieve"><span>02</span><strong data-i18n="flowRetrieve">Retrieve</strong></div>
+          <div class="flow-step" data-flow-step="cite"><span>03</span><strong data-i18n="flowCite">Cite</strong></div>
+          <div class="flow-step" data-flow-step="evaluate"><span>04</span><strong data-i18n="flowEvaluate">Evaluate</strong></div>
+        </section>
+
+        <div class="meta-strip">
+          <div><span>Trace ID</span><strong id="traceId" data-i18n="notRun">尚未运行</strong></div>
+          <div><span>Retrieval</span><strong id="retrievalLabel">hybrid k=4</strong></div>
+          <div><span>Generation</span><strong id="generationProvider">local</strong></div>
+          <div><span>检索置信度 Retrieval confidence</span><strong id="confidence">0.00</strong></div>
+          <div><span data-i18n="chunkStatLabel">Chunks</span><strong id="chunkStat">0</strong></div>
+        </div>
+
+        <div class="workbench-grid">
+          <section class="panel">
+            <h2><span data-i18n="uploadTitle">上传知识文档</span></h2>
+            <form id="uploadForm" class="upload-box">
+              <input id="fileInput" type="file" accept=".md,.markdown,.txt,.pdf" />
+              <button type="submit" data-i18n="uploadButton">上传文档</button>
+              <p data-i18n="uploadHint">支持 PDF、Markdown 和 TXT。文件会在本地索引。</p>
+            </form>
+            <div class="mini-actions">
+              <button type="button" id="refreshDocumentsButton" class="secondary" data-i18n="refreshDocumentsButton">刷新文档</button>
+              <button type="button" id="clearDocumentsButton" class="secondary" data-i18n="clearDocumentsButton">清空索引</button>
+            </div>
+            <ul id="documentList" class="file-list"></ul>
+            <div id="chunkPreview" class="chunk-preview"></div>
+          </section>
+
+          <section class="panel ask-card">
+            <h2><span data-i18n="askTitle">提出问题</span></h2>
+            <form id="askForm" class="ask-form">
+              <textarea id="questionInput">What does an expense report need?</textarea>
+              <div class="form-row">
+                <button type="submit" data-i18n="askButton">提问</button>
+                <button type="button" class="secondary" data-view-target="settings">调整参数</button>
+              </div>
+            </form>
+          </section>
+        </div>
+
+        <section class="answer-grid">
+          <article class="answer-panel">
+            <div class="panel-heading">
+              <h2 data-i18n="answerTitle">回答</h2>
+              <span id="citationCount">0 条引用</span>
+            </div>
+            <div id="rewrittenQuery" class="rewritten-query" hidden></div>
+            <p id="answerText" class="answer-text" data-i18n="answerEmpty">上传文档并提问后，回答会带着来源引用显示在这里。</p>
+            <div class="feedback-actions" aria-label="answer feedback">
+              <button type="button" id="feedbackHelpfulButton" class="secondary">有用</button>
+              <button type="button" id="feedbackNotHelpfulButton" class="secondary">无用</button>
+              <span id="feedbackStatus">等待回答后可评分</span>
+            </div>
+          </article>
+
+          <article class="evidence-panel">
+            <div class="panel-heading">
+              <h2 data-i18n="evidenceTitle">证据</h2>
+              <span data-i18n="topMatches">Top matches</span>
+            </div>
+            <div class="evidence-body">
+              <div class="evidence-rail" aria-hidden="true"></div>
+              <ol id="citationList" class="citations"></ol>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <section class="view-panel" data-view="evaluation">
+        <div class="page-heading">
+          <div>
+            <h2>评测中心 Evaluation</h2>
+            <p>管理评测集，运行单策略评测，或比较不同检索策略。</p>
+          </div>
+          <div class="form-row compact-actions">
+            <button type="button" id="runEvalButton" data-i18n="runEvalButton">运行评测</button>
+            <button type="button" id="compareStrategiesButton" class="secondary" data-i18n="compareButton">对比策略</button>
+          </div>
+        </div>
+
+        <section class="panel">
+          <h2><span data-i18n="evalSetTitle">评测集</span></h2>
+          <div class="settings-grid">
+            <label class="wide-field">
+              <span data-i18n="evalSetLabel">当前评测集</span>
+              <select id="evalSetSelect"></select>
+            </label>
+            <label>
+              <span data-i18n="evalSetUploadLabel">上传 JSON</span>
+              <input id="evalSetFileInput" type="file" accept=".json" />
+            </label>
+            <label>
+              <span data-i18n="evalSetNameLabel">保存为</span>
+              <input id="evalSetNameInput" value="custom.json" />
+            </label>
+          </div>
+          <div class="mini-actions">
+            <button type="button" id="uploadEvalSetButton" data-i18n="uploadEvalSetButton">上传评测集</button>
+            <button type="button" id="deleteEvalSetButton" class="secondary" data-i18n="deleteEvalSetButton">删除评测集</button>
+          </div>
+        </section>
+
+        <section class="evaluation">
+          <div class="panel-heading">
+            <h2 data-i18n="evalTitle">评测结果</h2>
+            <span id="evalSummary" data-i18n="noRunYet">尚未运行</span>
+          </div>
+          <div class="metrics">
+            <div><span data-i18n="passRate">通过率</span><strong id="passRate">0%</strong></div>
+            <div><span data-i18n="coverage">引用覆盖率</span><strong id="coverage">0%</strong></div>
+            <div><span data-i18n="latency">平均延迟</span><strong id="latency">0 ms</strong></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="questionColumn">问题</th>
+                  <th data-i18n="expectedTermsColumn">期望关键词</th>
+                  <th data-i18n="statusColumn">状态</th>
+                  <th data-i18n="latencyColumn">延迟</th>
+                </tr>
+              </thead>
+              <tbody id="evalRows">
+                <tr><td colspan="4" data-i18n="evalEmpty">运行评测后会填充这张表。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="evaluation comparison">
+          <div class="panel-heading">
+            <h2 data-i18n="comparisonTitle">策略对比</h2>
+            <span id="comparisonSummary" data-i18n="noComparisonYet">尚未对比</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="strategyColumn">策略</th>
+                  <th>Mode</th>
+                  <th>Top K</th>
+                  <th>Prompt</th>
+                  <th data-i18n="passRateColumn">通过率</th>
+                  <th data-i18n="coverageColumn">覆盖率</th>
+                  <th data-i18n="latencyColumn">延迟</th>
+                </tr>
+              </thead>
+              <tbody id="comparisonRows">
+                <tr><td colspan="7" data-i18n="comparisonEmpty">对比策略后会填充这张表。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="strategy-bars" aria-live="polite">
+            <div class="strategy-bar empty" data-i18n="comparisonEmpty">对比策略后会填充这张表。</div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view-panel" data-view="settings">
+        <div class="page-heading">
+          <div>
+            <h2>参数设置 Settings</h2>
+            <p>模型、Prompt、检索策略、多路召回和 Rerank 都在这里配置。</p>
+          </div>
+          <button type="submit" form="configForm" data-i18n="saveConfigButton">保存配置</button>
+        </div>
+
+        <div class="settings-layout">
+          <section class="panel">
+            <h2><span data-i18n="settingsTitle">检索设置</span></h2>
+            <div class="settings-grid">
+              <label>
+                <span>分块策略 Chunk strategy</span>
+                <select id="chunkStrategy">
+                  <option value="heading">标题感知 Heading-aware</option>
+                  <option value="paragraph">段落 Paragraph</option>
+                  <option value="fixed">固定长度 Fixed-size</option>
+                </select>
+              </label>
+              <label>
+                <span>分块大小 Chunk size</span>
+                <select id="chunkSize">
+                  <option value="300">300</option>
+                  <option value="600">600</option>
+                  <option value="900" selected>900</option>
+                  <option value="1200">1200</option>
+                </select>
+              </label>
+              <label>
+                <span>重叠长度 Overlap</span>
+                <select id="chunkOverlap">
+                  <option value="0" selected>0</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </label>
+              <label>
+                <span>检索模式 Retrieval mode</span>
+                <select id="retrievalMode">
+                  <option value="tfidf">关键词 TF-IDF</option>
+                  <option value="bm25">关键词排序 BM25-like</option>
+                  <option value="embedding">语义检索 Embedding</option>
+                  <option value="hybrid" selected>混合检索 Hybrid</option>
+                </select>
+              </label>
+              <label>
+                <span>召回数量 Top K</span>
+                <select id="topK">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="4" selected>4</option>
+                  <option value="6">6</option>
+                </select>
+              </label>
+              <label>
+                <span>分数阈值 Score threshold</span>
+                <input id="scoreThreshold" type="number" min="0" step="0.1" value="0" />
+              </label>
+              <label>
+                <span>Prompt 版本 Prompt version</span>
+                <select id="promptVersion">
+                  <option value="grounded" selected>严谨溯源 Grounded</option>
+                  <option value="concise">简洁回答 Concise</option>
+                  <option value="analyst">分析说明 Analyst</option>
+                </select>
+              </label>
+              <label>
+                <span>查询改写 Query rewrite</span>
+                <select id="queryRewrite">
+                  <option value="off" selected>关闭 Off</option>
+                  <option value="llm">大模型改写 LLM rewrite</option>
+                </select>
+              </label>
+              <label>
+                <span>多路召回 Multi-route</span>
+                <select id="multiRoute">
+                  <option value="off" selected>关闭 Off</option>
+                  <option value="on">开启 On</option>
+                </select>
+              </label>
+              <label>
+                <span>重排 Rerank</span>
+                <select id="rerankToggle">
+                  <option value="off" selected>关闭 Off</option>
+                  <option value="on">开启 On</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2><span data-i18n="modelTitle">模型与观测</span></h2>
+            <form id="configForm" class="settings-grid">
+              <label>
+                <span>Model group</span>
+                <select id="modelGroup">
+                  <option value="local">Local fallback</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </label>
+              <label>
+                <span>回答接口 Answer API mode</span>
+                <select id="answerApiMode">
+                  <option value="auto" selected>Auto</option>
+                  <option value="chat_completions">Chat Completions</option>
+                  <option value="responses">Responses API</option>
+                </select>
+              </label>
+              <label>
+                <span>Answer model</span>
+                <input id="answerModel" value="gpt-4.1-mini" />
+              </label>
+              <label>
+                <span>Answer API Key</span>
+                <input id="openaiApiKey" type="password" autocomplete="off" placeholder="sk-..." />
+              </label>
+              <label class="wide-field">
+                <span>Answer Base URL</span>
+                <input id="openaiBaseUrl" value="https://api.openai.com" placeholder="https://api.openai.com or https://your-gateway/v1" />
+              </label>
+              <label>
+                <span>Embedding model</span>
+                <input id="embeddingModel" value="text-embedding-v4" />
+              </label>
+              <label>
+                <span>Embedding API Key</span>
+                <input id="embeddingApiKey" type="password" autocomplete="off" placeholder="DashScope or OpenAI key" />
+              </label>
+              <label class="wide-field">
+                <span>Embedding Base URL</span>
+                <input id="embeddingBaseUrl" value="https://dashscope.aliyuncs.com/compatible-mode/v1" placeholder="https://dashscope.aliyuncs.com/compatible-mode/v1" />
+              </label>
+              <label>
+                <span>Rerank provider</span>
+                <select id="rerankProvider">
+                  <option value="none">关闭 None</option>
+                  <option value="dashscope">百炼 DashScope</option>
+                </select>
+              </label>
+              <label>
+                <span>Rerank model</span>
+                <input id="rerankModel" value="gte-rerank-v2" />
+              </label>
+              <label>
+                <span>Rerank API Key</span>
+                <input id="rerankApiKey" type="password" autocomplete="off" placeholder="DashScope key" />
+              </label>
+              <label class="wide-field">
+                <span>Rerank Base URL</span>
+                <input id="rerankBaseUrl" value="https://dashscope.aliyuncs.com" />
+              </label>
+              <label>
+                <span>Langfuse public key</span>
+                <input id="langfusePublicKey" autocomplete="off" placeholder="pk-lf-..." />
+              </label>
+              <label>
+                <span>Langfuse secret key</span>
+                <input id="langfuseSecretKey" type="password" autocomplete="off" placeholder="sk-lf-..." />
+              </label>
+              <label class="wide-field">
+                <span>Langfuse Base URL</span>
+                <input id="langfuseHost" value="https://cloud.langfuse.com" />
+              </label>
+              <label class="wide-field">
+                <span>回答 Prompt Answer prompt</span>
+                <textarea id="answerPromptTemplate" class="prompt-template" placeholder="Use {question} and {context}"></textarea>
+              </label>
+              <label class="wide-field">
+                <span>查询改写 Prompt Rewrite prompt</span>
+                <textarea id="rewritePromptTemplate" class="prompt-template" placeholder="Rewrite {question} for retrieval"></textarea>
+              </label>
+              <button type="submit" class="wide-button" data-i18n="saveConfigButton">保存配置</button>
+            </form>
+            <div id="configStatus" class="config-status">Local fallback</div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view-panel" data-view="logs">
+        <div class="page-heading">
+          <div>
+            <h2 data-i18n="logTitle">运行日志</h2>
+            <p data-i18n="logHint">请求、成功响应和错误说明会集中显示在这里。</p>
+          </div>
+        </div>
+        <section class="panel log-panel">
+          <ol id="activityLog" class="activity-log" aria-live="polite"></ol>
+        </section>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>
