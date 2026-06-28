@@ -94,5 +94,5 @@ uv run python -m unittest discover -s tests
 node --check "rag-eval-assistant\frontend\app.js"
 ```
 ## 界面
-<img width="1415" height="1011" alt="image" src="https://github.com/user-attachments/assets/d7227259-df1a-4c3b-ab7a-db5680ddecc0" />
+[<img width="1415" height="1011" alt="image" src="https://github.com/user-attachments/assets/d7227259-df1a-4c3b-ab7a-db5680ddecc0" />](https://github.com/HayuNas/Evidra)
 
