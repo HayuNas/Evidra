@@ -63,9 +63,7 @@ uv sync --extra pdf --extra langfuse
 - Rerank provider：选择 `百炼 DashScope` 后填写 rerank key 和模型名。
 - Langfuse：填写 public key、secret key、host 后启用远端观测。
 
-所有密钥仅保存到本地 `rag-eval-assistant/data/runtime_config.json`，该文件已被 `.gitignore` 忽略，不会进入 GitHub 提交或交付压缩包。
-
-## 推荐演示流程
+## 演示流程
 
 1. 启动后端，打开前端。
 2. 上传 `rag-eval-assistant/docs/sample-handbook.md` 或自己的简历 PDF。
@@ -95,17 +93,6 @@ uv run python -m unittest discover -s tests
 ```powershell
 node --check "rag-eval-assistant\frontend\app.js"
 ```
+## 界面
+<img width="1415" height="1011" alt="image" src="https://github.com/user-attachments/assets/d7227259-df1a-4c3b-ab7a-db5680ddecc0" />
 
-## 交付说明
-
-仓库不会提交这些本地运行数据：
-
-- `.venv/`
-- `__pycache__/`
-- `rag-eval-assistant/data/runtime_config.json`
-- `rag-eval-assistant/data/indexes/`
-- `rag-eval-assistant/data/traces/`
-- `rag-eval-assistant/data/uploads/`
-- `rag-eval-assistant/docs/backups/`
-
-本地交付压缩包在 `release/` 下生成，但该目录不提交到 GitHub。
